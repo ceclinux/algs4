@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="Assignment 1: Percolation"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="/usr/lib/jvm/java-7-openjdk/jre/lib/algs4.jar"/>
-	<classpathentry kind="lib" path="/usr/lib/jvm/java-7-openjdk/jre/lib/stdlib.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

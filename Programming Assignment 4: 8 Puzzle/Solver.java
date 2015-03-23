@@ -3,40 +3,8 @@ import java.util.TreeSet;
 
 public class Solver {
   private final Board board;
-  private Thread thread;
-  private boolean twinSlove;
   private boolean isSloved;
   private Stack<Board> bq;
-
-  // find a solution to the initial board (using the A* algorithm)
-  private class TwinRunnable implements Runnable {
-
-    @Override
-    public void run() {
-      Solver.SloveTree t = new SloveTree();
-      Node i = t.put(t.root(), board.twin());
-      MinPQ<Node> open = new MinPQ<Node>(c);
-      open.insert(i);
-      TreeSet<Board> close = new TreeSet<Board>(cc);
-      Node min = open.min();
-      Board b = min.getBoard();
-      while (!(open.isEmpty() || b.isGoal()) && !isSloved) {
-        min = open.delMin();
-        b = min.getBoard();
-        close.add(b);
-        for (Board neigh : b.neighbors()) {
-          if (!close.contains(neigh)) {
-            Node temp = t.put(min, neigh);
-            open.insert(temp);
-          }
-        }
-      }
-      if (open.isEmpty() || b.isGoal()) {
-        twinSlove = true;
-        isSloved = true;
-      }
-    }
-  };
 
   private class Node {
     private Board key;
@@ -75,22 +43,22 @@ public class Solver {
       if (root.one == null) {
         root.one = new Node(key);
         root.one.head = root;
-        root.one.moves = root.moves+1;
+        root.one.moves = root.moves + 1;
         return root.one;
       } else if (root.two == null) {
         root.two = new Node(key);
         root.two.head = root;
-        root.two.moves = root.moves+1;
+        root.two.moves = root.moves + 1;
         return root.two;
       } else if (root.three == null) {
         root.three = new Node(key);
         root.three.head = root;
-        root.three.moves = root.moves+1;
+        root.three.moves = root.moves + 1;
         return root.three;
       } else {
         root.four = new Node(key);
         root.four.head = root;
-        root.four.moves = root.moves+1;
+        root.four.moves = root.moves + 1;
         return root.four;
       }
     }
@@ -117,17 +85,46 @@ public class Solver {
     }
   };
 
-  public Solver(Board initial){
+  public Solver(Board initial) {
+    
+
+    String[] sb = initial.toString().split("\n");
+    int di = initial.dimension();
+    int[][] storeint = new int[di][di];
+    for (int i = 1; i <= di; i++) {
+      String[] oneline = sb[i].split("(?<=\\G...)");
+      for (int t = 0; t < di; t++) {
+        storeint[i - 1][t] = Integer.parseInt(oneline[t].trim());
+      }
+    }
+    int total = 0;
+    int zerorow = 0;
+    for (int i = 0; i < di; i++) {
+      for (int j = 0; j < di; j++) {
+        for (int k = i * di + j; k < di * di; k++) {
+          int row = k / di;
+          int col = k % di;
+          if (storeint[i][j] != 0 && storeint[row][col] != 0) {
+            if (storeint[i][j] > storeint[row][col]) {
+              total++;
+            }
+          } else {
+            zerorow = i;
+          }
+        }
+      }
+    }
+    isSloved = ((di % 2 == 1) && (total % 2 == 0))
+        || ((di % 2 == 0) && ((zerorow % 2 == 1) == (total % 2 == 0)));
     board = initial;
-    bq = new Stack<Board>();
-    TwinRunnable r = new TwinRunnable();
-    thread = new Thread(r);
-    thread.start();
-    Node min = solve(initial);
-    isSloved = true;
-    while (min != null) {
-      bq.push(min.getBoard());
-      min = min.head;
+    if (isSloved) {
+      bq = new Stack<Board>();
+      Node min = solve(initial);
+      System.out.println(min);
+      while (min != null) {
+        bq.push(min.getBoard());
+        min = min.head;
+      }
     }
   }
 
@@ -139,7 +136,7 @@ public class Solver {
     TreeSet<Board> close = new TreeSet<Board>(cc);
     Node min = open.min();
     Board b = min.getBoard();
-    while (!(open.isEmpty() || b.isGoal()) && !isSloved) {
+    while (!(open.isEmpty() || b.isGoal())) {
       min = open.delMin();
       b = min.getBoard();
       close.add(b);
@@ -155,7 +152,7 @@ public class Solver {
 
   // is the initial board solvable?
   public boolean isSolvable() {
-    return !twinSlove;
+    return isSloved;
   }
 
   // min number of moves to solve initial board; -1 if unsolvable
@@ -175,27 +172,17 @@ public class Solver {
   }
 
   // solve a slider puzzle (given below)
-  public static void main(String[] args) throws InterruptedException {
-//    int[][] n = new int[3][3];
-//    n[0][0] = 5;
-//    n[0][1] = 2;
-//    n[0][2] = 3;
-//    n[1][0] = 4;
-//    n[1][1] = 7;
-//    n[1][2] = 0;
-//    n[2][0] = 8;
-//    n[2][1] = 6;
-//    n[2][2] = 1;
-    int[][] n = new int[2][2];
-    n[0][0] = 1;
-    n[0][1] = 3;
-    n[1][0] = 2;
-    n[1][1] = 0;
-    
-    Board bb = new Board(n);
-    Solver s = new Solver(bb);
-    System.out.println(s.isSolvable());
-    System.out.println(s.moves());
-    System.out.println(s.solution());
+  public static void main(String[] args){
+//    int[][] n = new int[3][];
+//    n[0] = new int[] { 1, 2, 3 };
+//    n[1] = new int[] { 4, 6, 5 };
+//    n[2] = new int[] { 8, 7, 0 };
+//
+//    Board bb = new Board(n);
+//
+//    Solver s = new Solver(bb);
+//    System.out.println(s.isSolvable());
+//    System.out.println(s.moves());
+//    System.out.println(s.solution());
   }
 }

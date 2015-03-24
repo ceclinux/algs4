@@ -2,7 +2,6 @@ import java.util.Comparator;
 import java.util.TreeSet;
 
 public class Solver {
-  private final Board board;
   private boolean isSloved;
   private Stack<Board> bq;
 
@@ -86,8 +85,6 @@ public class Solver {
   };
 
   public Solver(Board initial) {
-    
-
     String[] sb = initial.toString().split("\n");
     int di = initial.dimension();
     int[][] storeint = new int[di][di];
@@ -116,7 +113,6 @@ public class Solver {
     }
     isSloved = ((di % 2 == 1) && (total % 2 == 0))
         || ((di % 2 == 0) && ((zerorow % 2 == 1) == (total % 2 == 0)));
-    board = initial;
     if (isSloved) {
       bq = new Stack<Board>();
       Node min = solve(initial);
@@ -172,17 +168,17 @@ public class Solver {
   }
 
   // solve a slider puzzle (given below)
-  public static void main(String[] args){
-//    int[][] n = new int[3][];
-//    n[0] = new int[] { 1, 2, 3 };
-//    n[1] = new int[] { 4, 6, 5 };
-//    n[2] = new int[] { 8, 7, 0 };
-//
-//    Board bb = new Board(n);
-//
-//    Solver s = new Solver(bb);
-//    System.out.println(s.isSolvable());
-//    System.out.println(s.moves());
-//    System.out.println(s.solution());
+  public static void main(String[] args) {
+    int[][] n = new int[3][];
+    n[0] = new int[] { 1, 2, 3 };
+    n[1] = new int[] { 4, 6, 5 };
+    n[2] = new int[] { 8, 7, 0 };
+
+    Board bb = new Board(n);
+
+    Solver s = new Solver(bb);
+    System.out.println(s.isSolvable());
+    System.out.println(s.moves());
+    System.out.println(s.solution());
   }
 }

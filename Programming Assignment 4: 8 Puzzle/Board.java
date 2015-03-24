@@ -1,4 +1,3 @@
-
 import java.util.Iterator;
 
 public class Board {
@@ -8,14 +7,14 @@ public class Board {
   // construct a board from an N-by-N array of blocks
   // (where blocks[i][j] = block in row i, column j)
   public Board(int[][] blocks) {
-      N = blocks.length;
-      this.blocks = new int[N][N];
-      for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-          this.blocks[i][j] = blocks[i][j];
-        }
+    N = blocks.length;
+    this.blocks = new int[N][N];
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+        this.blocks[i][j] = blocks[i][j];
       }
-    
+    }
+
   }
 
   // board dimension N
@@ -94,10 +93,10 @@ public class Board {
       return false;
     }
 
-    int[][] arr_thatBoard = thatBoard.blocks;
+    int[][] otherboard = thatBoard.blocks;
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        if (blocks[i][j] != arr_thatBoard[i][j]) {
+        if (blocks[i][j] != otherboard[i][j]) {
           return false;
         }
       }
@@ -118,8 +117,8 @@ public class Board {
   }
 
   private class BoardIterator implements Iterator<Board> {
-    Bag<Board> b = new Bag<Board>();
-    Iterator<Board> biterator;
+    private Bag<Board> b = new Bag<Board>();
+    private Iterator<Board> biterator;
 
     private BoardIterator() {
 
@@ -127,16 +126,16 @@ public class Board {
         for (int j = 0; j < N; j++) {
           if (blocks[i][j] == 0) {
             if (i != 0) {
-              b.add(new Board(swap(i- 1, j , i , j)));
+              b.add(new Board(swap(i - 1, j, i, j)));
             }
             if (i != (N - 1)) {
-              b.add(new Board(swap(i+ 1, j , i , j)));
+              b.add(new Board(swap(i + 1, j, i, j)));
             }
             if (j != 0) {
-              b.add(new Board(swap(i, j - 1 , i, j )));
+              b.add(new Board(swap(i, j - 1, i, j)));
             }
             if (j != (N - 1)) {
-              b.add(new Board(swap(i, j + 1, i, j )));
+              b.add(new Board(swap(i, j + 1, i, j)));
             }
           }
         }
@@ -207,15 +206,15 @@ public class Board {
     System.out.println(bb);
     for (Board b : bb.neighbors()) {
       System.out.println(b);
-//      System.out.println(b.manhattan());
+      // System.out.println(b.manhattan());
     }
-//    for (int i = 0; i < 3; i++) {
-//      for (int j = 0; j < 3; j++) {
-//        System.out.println(n[i][j]);
-//      }
-//    }
-//    System.out.println(bb);
-//  System.out.println(bb.manhattan());
+    // for (int i = 0; i < 3; i++) {
+    // for (int j = 0; j < 3; j++) {
+    // System.out.println(n[i][j]);
+    // }
+    // }
+    // System.out.println(bb);
+    // System.out.println(bb.manhattan());
   }
-  
+
 }

@@ -1,94 +1,16 @@
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.TreeSet;
 
 public class Solver {
   private boolean isSloved;
-  private Stack<Board> bq;
-
-  private class Node {
-    private Board key;
-    private Node head, one, two, three, four;
-    private int moves;
-
-    public Node(Board key) {
-      this.moves = 0;
-      this.key = key;
-    }
-
-    public int value() {
-      return key.manhattan() + moves;
-    }
-
-    public Board getBoard() {
-      return key;
-    }
-
-    public String toString() {
-      return key.toString();
-    }
-  }
-
-  private class SloveTree {
-    private Node root;
-
-    public Node root() {
-      return root;
-    }
-
-    public Node put(Node root, Board key) {
-      if (root == null) {
-        return new Node(key);
-      }
-      if (root.one == null) {
-        root.one = new Node(key);
-        root.one.head = root;
-        root.one.moves = root.moves + 1;
-        return root.one;
-      } else if (root.two == null) {
-        root.two = new Node(key);
-        root.two.head = root;
-        root.two.moves = root.moves + 1;
-        return root.two;
-      } else if (root.three == null) {
-        root.three = new Node(key);
-        root.three.head = root;
-        root.three.moves = root.moves + 1;
-        return root.three;
-      } else {
-        root.four = new Node(key);
-        root.four.head = root;
-        root.four.moves = root.moves + 1;
-        return root.four;
-      }
-    }
-  }
-
-  private Comparator<Node> c = new Comparator<Node>() {
-    public int compare(Node o1, Node o2) {
-      if (o1.value() < o2.value())
-        return -1;
-      else if (o1.value() == o2.value())
-        return 0;
-      else
-        return 1;
-    }
-  };
-  private Comparator<Board> cc = new Comparator<Board>() {
-    public int compare(Board o1, Board o2) {
-      if (o1.manhattan() < o2.manhattan())
-        return -1;
-      else if (o1.equals(o2))
-        return 0;
-      else
-        return 1;
-    }
-  };
-
+  private Stack<Board> bStack;
   public Solver(Board initial) {
     String[] sb = initial.toString().split("\n");
     int di = initial.dimension();
     int[][] storeint = new int[di][di];
     for (int i = 1; i <= di; i++) {
+      //split one line into several cells, each cell has 3 characters
       String[] oneline = sb[i].split("(?<=\\G...)");
       for (int t = 0; t < di; t++) {
         storeint[i - 1][t] = Integer.parseInt(oneline[t].trim());
@@ -111,34 +33,108 @@ public class Solver {
         }
       }
     }
-    isSloved = ((di % 2 == 1) && (total % 2 == 0))
-        || ((di % 2 == 0) && ((zerorow % 2 == 1) == (total % 2 == 0)));
+    // see https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+    isSloved = (((di % 2) != 0) && (total % 2 == 0))
+        || ((di % 2 == 0) && (((zerorow % 2) != 0) == (total % 2 == 0)));
     if (isSloved) {
-      bq = new Stack<Board>();
+      bStack = new Stack<Board>();
       Node min = solve(initial);
-      System.out.println(min);
       while (min != null) {
-        bq.push(min.getBoard());
+        bStack.push(min.getBoard());
         min = min.head;
       }
     }
   }
 
+  /**
+   * The node class to synchronize the game tree
+   * @author ceclinux
+   *
+   */
+  private class Node {
+    private Board key;
+    private Node head, one, two, three, four;
+    private int moves;
+
+    private Node(Board key) {
+      this.moves = 0;
+      this.key = key;
+    }
+
+    public int value() {
+      return key.manhattan() + moves;
+    }
+
+    public Board getBoard() {
+      return key;
+    }
+
+    public String toString() {
+      return key.toString();
+    }
+  }
+
+  private Node put(Node ro, Board key) {
+    if (ro == null) {
+      return new Node(key);
+    }
+    if (ro.one == null) {
+      ro.one = new Node(key);
+      ro.one.head = ro;
+      ro.one.moves = ro.moves + 1;
+      return ro.one;
+    } else if (ro.two == null) {
+      ro.two = new Node(key);
+      ro.two.head = ro;
+      ro.two.moves = ro.moves + 1;
+      return ro.two;
+    } else if (ro.three == null) {
+      ro.three = new Node(key);
+      ro.three.head = ro;
+      ro.three.moves = ro.moves + 1;
+      return ro.three;
+    } else {
+      ro.four = new Node(key);
+      ro.four.head = ro;
+      ro.four.moves = ro.moves + 1;
+      return ro.four;
+    }
+    
+  }
+
   private Node solve(Board initial) {
-    Solver.SloveTree tree = new SloveTree();
-    Node i = tree.put(tree.root(), initial);
-    MinPQ<Node> open = new MinPQ<Node>(c);
+
+    Node i = put(null, initial);
+    MinPQ<Node> open = new MinPQ<Node>(new Comparator<Node>() {
+      public int compare(Node o1, Node o2) {
+        if (o1.value() < o2.value())
+          return -1;
+        else if (o1.value() == o2.value())
+          return 0;
+        else
+          return 1;
+      }
+    });
     open.insert(i);
-    TreeSet<Board> close = new TreeSet<Board>(cc);
+    TreeSet<Board> close = new TreeSet<Board>(new Comparator<Board>() {
+      public int compare(Board o1, Board o2) {
+        if (o1.manhattan() < o2.manhattan())
+          return -1;
+        else if (o1.equals(o2))
+          return 0;
+        else
+          return 1;
+      }
+    });
     Node min = open.min();
     Board b = min.getBoard();
-    while (!(open.isEmpty() || b.isGoal())) {
+    while (!b.isGoal()) {
       min = open.delMin();
       b = min.getBoard();
       close.add(b);
       for (Board neigh : b.neighbors()) {
-        if (!close.contains(neigh)) {
-          Node temp = tree.put(min, neigh);
+        if (!(min.head != null && min.head.getBoard().equals(neigh))) {
+          Node temp = put(min, neigh);
           open.insert(temp);
         }
       }
@@ -151,10 +147,10 @@ public class Solver {
     return isSloved;
   }
 
-  // min number of moves to solve initial board; -1 if unsolvable
+  // Minimun number of moves to solve initial board; -1 if unsolvable
   public int moves() {
     if (isSolvable()) {
-      return bq.size() - 1;
+      return bStack.size() - 1;
     }
     return -1;
   }
@@ -162,23 +158,34 @@ public class Solver {
   // sequence of boards in a shortest solution; null if unsolvable
   public Iterable<Board> solution() {
     if (isSolvable()) {
-      return bq;
+      return bStack;
     }
     return null;
   }
 
   // solve a slider puzzle (given below)
   public static void main(String[] args) {
-    int[][] n = new int[3][];
-    n[0] = new int[] { 1, 2, 3 };
-    n[1] = new int[] { 4, 6, 5 };
-    n[2] = new int[] { 8, 7, 0 };
+    // create initial board from file
+    In in = new In(args[0]);
+    int N = in.readInt();
+    int[][] blocks = new int[N][N];
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            blocks[i][j] = in.readInt();
+    Board initial = new Board(blocks);
 
-    Board bb = new Board(n);
+    // solve the puzzle
+    Solver solver = new Solver(initial);
 
-    Solver s = new Solver(bb);
-    System.out.println(s.isSolvable());
-    System.out.println(s.moves());
-    System.out.println(s.solution());
+    // print solution to standard output
+    if (!solver.isSolvable())
+        StdOut.println("No solution possible");
+    else {
+        StdOut.println("Minimum number of moves = " + solver.moves());
+        for (Board board : solver.solution()){
+            StdOut.println(board);
+        }
+    }
+
   }
 }
